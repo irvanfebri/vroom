@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Booking;
+use App\Models\Type;
 use App\Models\Brand;
 use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
-use App\Http\Requests\BrandRequest;
+use App\Http\Requests\BookingRequest;
 use App\Http\Controllers\Controller;
 
-class BrandController extends Controller
+class BookingController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,37 +20,36 @@ class BrandController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $query = Brand::query();
+            $query = Booking::with(['item.brand', 'user']);
 
             return DataTables::of($query)
-                ->addColumn('action', function ($brand) {
+                ->addColumn('action', function ($booking) {
                     return '
                         <a class="block w-full px-2 py-1 mb-1 text-xs text-center text-white transition duration-500 bg-gray-700 border border-gray-700 rounded-md select-none ease hover:bg-gray-800 focus:outline-none focus:shadow-outline" 
-                            href="' . route('admin.brand.edit', $brand->id) . '">
+                            href="' . route('admin.booking.edit', $booking->id) . '">
                             Sunting
                         </a>
-                        <form class="block w-full" onsubmit="return confirm(\'Apakah anda yakin?\');" -block" action="' . route('admin.brand.destroy', $brand->id) . '" method="POST">
+                        <form class="block w-full" onsubmit="return confirm(\'Apakah anda yakin?\');" -block" action="' . route('admin.booking.destroy', $booking->id) . '" method="POST">
                         <button class="w-full px-2 py-1 text-xs text-white transition duration-500 bg-red-500 border border-red-500 rounded-md select-none ease hover:bg-red-600 focus:outline-none focus:shadow-outline" >
                             Hapus
                         </button>
                             ' . method_field('delete') . csrf_field() . '
                         </form>';
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'thumbnail'])
                 ->make();
         }
 
-        return view('admin.brand.index');
+        return view('admin.booking.index');
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View returned
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        return view('admin.brand.create');
     }
 
     /**
@@ -57,23 +58,17 @@ class BrandController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(BrandRequest $request)
+    public function store(BookingRequest $request)
     {
-        $data = $request->all();
-        $data['slug'] = Str::slug($data['name']) . '-' . Str::lower(Str::random(5));
-
-        Brand::create($data);
-
-        return redirect()->route('admin.brand.index');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Brand  $brand
+     * @param  \App\Models\Booking  $booking
      * @return \Illuminate\Http\Response
      */
-    public function show(Brand $brand)
+    public function show(Booking $booking)
     {
         //
     }
@@ -81,13 +76,13 @@ class BrandController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Brand  $brand
+     * @param  \App\Models\Booking  $booking
      * @return \Illuminate\Http\Response|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function edit(Brand $brand)
+    public function edit(Booking $booking)
     {
-        return view('admin.brand.edit', [
-            'brand' => $brand,
+        return view('admin.booking.edit', [
+            'booking' => $booking,
         ]);
     }
 
@@ -95,29 +90,28 @@ class BrandController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Brand  $brand
+     * @param  \App\Models\Booking  $booking
      * @return \Illuminate\Http\Response
      */
-    public function update(BrandRequest $request, Brand $brand)
+    public function update(BookingRequest $request, Booking $booking)
     {
         $data = $request->all();
-        $data['slug'] = Str::slug($data['name']) . '-' . Str::lower(Str::random(5));
 
-        $brand->update($data);
+        $booking->update($data);
 
-        return redirect()->route('admin.brand.index');
+        return redirect()->route('admin.booking.index');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Brand  $brand
+     * @param  \App\Models\Booking  $booking
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Brand $brand)
+    public function destroy(Booking $booking)
     {
-        $brand->delete();
+        $booking->delete();
 
-        return redirect()->route('admin.brand.index');
+        return redirect()->route('admin.booking.index');
     }
 }
